@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.Objects;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,22 +16,30 @@ import java.util.concurrent.locks.ReentrantLock;
 // - isEmpty(): boolean
 // - isFull(): boolean
 
-public class BlockingQueue {
-    public final Object[] queue;
+public class BlockingQueue<T> {
+    public final T[] queue;
     private int head = 0;
     private int tail = 0; // next available slot
     private int size = 0;
     private final int capacity;
-    private final ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock(true);
     private final Condition notFull = lock.newCondition();
     private final Condition notEmpty = lock.newCondition();
 
+    @SuppressWarnings("unchecked")
     public BlockingQueue(int capacity) {
         this.capacity = capacity;
-        queue = (Object[]) new Object[capacity];
+        queue = (T[]) new Object[capacity];
     }
 
-    public boolean add(Object item) {
+    /**
+     * Inserts the specified element into this queue if it is possible to do so
+     * immediately without violating capacity restrictions
+     * <p>
+     * if no space is currently available. return IllegalStateException
+     */
+    public boolean add(T item) {
+        Objects.requireNonNull(item);
         lock.lock();
         try {
             if (size == capacity) {
@@ -46,7 +55,15 @@ public class BlockingQueue {
         }
     }
 
-    public boolean offer(Object item) {
+    /**
+     * Inserts the specified element at the tail of this queue
+     * if it is possible to do so immediately without exceeding the queue's capacity
+     * <p>
+     * return true upon success
+     * return false if this queue is full.
+     */
+    public boolean offer(T item) {
+        Objects.requireNonNull(item);
         lock.lock();
         try {
             if (size == capacity) {
@@ -62,15 +79,27 @@ public class BlockingQueue {
         }
     }
 
-    public boolean offer(Object item, long timeout) throws InterruptedException {
-        lock.lock();
+    /**
+     * Inserts the specified element at the tail of this queue,
+     * waiting up to the specified wait time for space to become available if the queue is full
+     * <p>
+     * return true if successful
+     * false if the specified waiting time elapses before space is available
+     * <p>
+     * Throw InterruptedException if interrupted while waiting by other threads
+     */
+    public boolean offer(T item, long timeout) throws InterruptedException {
+        Objects.requireNonNull(item);
+        // lock.lock() ignores interruptions and keeps trying to acquire the lock.
+        // lock.lockInterruptibly If we want to support interruption, we should use lockInterruptibly instead of lock()
+        lock.lockInterruptibly();
         try {
             long nanos = timeout * 1_000_000;
             while (size == capacity) {
                 if (nanos <= 0) {
                     return false;
                 }
-                nanos = notFull.awaitNanos(nanos);
+                nanos = notFull.awaitNanos(nanos); // return remaining time to wait if waked up by signal
             }
             queue[tail] = item;
             tail = (tail + 1) % capacity;
@@ -82,11 +111,14 @@ public class BlockingQueue {
         }
     }
 
-    public void put(Object item) throws InterruptedException {
-        lock.lock();
+    public void put(T item) throws InterruptedException {
+        Objects.requireNonNull(item);
+        // lock.lock() ignores interruptions and keeps trying to acquire the lock.
+        // lock.lockInterruptibly If we want to support interruption, we should use lockInterruptibly instead of lock()
+        lock.lockInterruptibly();
         try {
             while (size == capacity) {
-                notFull.await();
+                notFull.await(); // This can throw InterruptedException when system interrupt the thread
             }
             queue[tail] = item;
             tail = (tail + 1) % capacity;
@@ -98,7 +130,7 @@ public class BlockingQueue {
     }
 
     public Object take() throws InterruptedException {
-        lock.lock();
+        lock.lockInterruptibly();
         try {
             while (size == 0) {
                 notEmpty.await();
@@ -114,6 +146,7 @@ public class BlockingQueue {
     }
 
     public boolean contains(Object item) {
+        Objects.requireNonNull(item);
         lock.lock();
         try {
             for (int i = 0; i < size; i++) {
