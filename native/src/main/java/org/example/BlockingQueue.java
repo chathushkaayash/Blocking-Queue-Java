@@ -16,12 +16,12 @@ import java.util.concurrent.locks.ReentrantLock;
 // - isEmpty(): boolean
 // - isFull(): boolean
 
-public class BlockingQueue<T> {
+public class BlockingQueue {
     public static void main(String[] args) {
         System.out.println("Blocking Queue!");
     }
 
-    public final T[] queue;
+    public final Object[] queue;
     private int head = 0;
     private int tail = 0; // next available slot
     private int size = 0;
@@ -30,10 +30,9 @@ public class BlockingQueue<T> {
     private final Condition notFull = lock.newCondition();
     private final Condition notEmpty = lock.newCondition();
 
-    @SuppressWarnings("unchecked")
     public BlockingQueue(int capacity) {
         this.capacity = capacity;
-        queue = (T[]) new Object[capacity];
+        queue = new Object[capacity];
     }
 
     /**
@@ -42,20 +41,20 @@ public class BlockingQueue<T> {
      * <p>
      * if no space is currently available. return IllegalStateException
      */
-    public boolean add(T item) {
+    public static boolean add(BlockingQueue obj, Object item) {
         Objects.requireNonNull(item);
-        lock.lock();
+        obj.lock.lock();
         try {
-            if (size == capacity) {
+            if (obj.size == obj.capacity) {
                 throw new IllegalStateException("Queue is full");
             }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
-            notEmpty.signal();
+            obj.queue[obj.tail] = item;
+            obj.tail = (obj.tail + 1) % obj.capacity;
+            obj.size++;
+            obj.notEmpty.signal();
             return true;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
@@ -66,20 +65,20 @@ public class BlockingQueue<T> {
      * return true upon success
      * return false if this queue is full.
      */
-    public boolean offer(T item) {
+    public static boolean offer(BlockingQueue obj, Object item) {
         Objects.requireNonNull(item);
-        lock.lock();
+        obj.lock.lock();
         try {
-            if (size == capacity) {
+            if (obj.size == obj.capacity) {
                 return false;
             }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
-            notEmpty.signal();
+            obj.queue[obj.tail] = item;
+            obj.tail = (obj.tail + 1) % obj.capacity;
+            obj.size++;
+            obj.notEmpty.signal();
             return true;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
@@ -92,115 +91,115 @@ public class BlockingQueue<T> {
      * <p>
      * Throw InterruptedException if interrupted while waiting by other threads
      */
-    public boolean offer(T item, long timeout) throws InterruptedException {
+    public static boolean offer(BlockingQueue obj, Object item, long timeout) throws InterruptedException {
         Objects.requireNonNull(item);
         // lock.lock() ignores interruptions and keeps trying to acquire the lock.
         // lock.lockInterruptibly If we want to support interruption, we should use lockInterruptibly instead of lock()
-        lock.lockInterruptibly();
+        obj.lock.lockInterruptibly();
         try {
             long nanos = timeout * 1_000_000;
-            while (size == capacity) {
+            while (obj.size == obj.capacity) {
                 if (nanos <= 0) {
                     return false;
                 }
-                nanos = notFull.awaitNanos(nanos); // return remaining time to wait if waked up by signal
+                nanos = obj.notFull.awaitNanos(nanos); // return remaining time to wait if waked up by signal
             }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
-            notEmpty.signal();
+            obj.queue[obj.tail] = item;
+            obj.tail = (obj.tail + 1) % obj.capacity;
+            obj.size++;
+            obj.notEmpty.signal();
             return true;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
-    public void put(T item) throws InterruptedException {
+    public static void put(BlockingQueue obj, Object item) throws InterruptedException {
         Objects.requireNonNull(item);
         // lock.lock() ignores interruptions and keeps trying to acquire the lock.
         // lock.lockInterruptibly If we want to support interruption, we should use lockInterruptibly instead of lock()
-        lock.lockInterruptibly();
+        obj.lock.lockInterruptibly();
         try {
-            while (size == capacity) {
-                notFull.await(); // This can throw InterruptedException when system interrupt the thread
+            while (obj.size == obj.capacity) {
+                obj.notFull.await(); // This can throw InterruptedException when system interrupt the thread
             }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
-            notEmpty.signal();
+            obj.queue[obj.tail] = item;
+            obj.tail = (obj.tail + 1) % obj.capacity;
+            obj.size++;
+            obj.notEmpty.signal();
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
-    public Object take() throws InterruptedException {
-        lock.lockInterruptibly();
+    public static Object take(BlockingQueue obj) throws InterruptedException {
+        obj.lock.lockInterruptibly();
         try {
-            while (size == 0) {
-                notEmpty.await();
+            while (obj.size == 0) {
+                obj.notEmpty.await();
             }
-            Object item = queue[head];
-            head = (head + 1) % capacity;
-            size--;
-            notFull.signal();
+            Object item = obj.queue[obj.head];
+            obj.head = (obj.head + 1) % obj.capacity;
+            obj.size--;
+            obj.notFull.signal();
             return item;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
-    public boolean contains(Object item) {
+    public static boolean contains(BlockingQueue obj, Object item) {
         Objects.requireNonNull(item);
-        lock.lock();
+        obj.lock.lock();
         try {
-            for (int i = 0; i < size; i++) {
-                if (queue[(head + i) % capacity].equals(item)) {
+            for (int i = 0; i < obj.size; i++) {
+                if (obj.queue[(obj.head + i) % obj.capacity].equals(item)) {
                     return true;
                 }
             }
             return false;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
-    public Object peek() {
-        lock.lock();
+    public static Object peek(BlockingQueue obj) {
+        obj.lock.lock();
         try {
-            if (size == 0) {
+            if (obj.size == 0) {
                 return null;
             }
-            return queue[head];
+            return obj.queue[obj.head];
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
-    public boolean isEmpty() {
-        lock.lock();
+    public static boolean isEmpty(BlockingQueue obj) {
+        obj.lock.lock();
         try {
-            return size == 0;
+            return obj.size == 0;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
-    public boolean isFull() {
-        lock.lock();
+    public static boolean isFull(BlockingQueue obj) {
+        obj.lock.lock();
         try {
-            return size == capacity;
+            return obj.size == obj.capacity;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 
 
-    public int size() {
-        lock.lock();
+    public static int size(BlockingQueue obj) {
+        obj.lock.lock();
         try {
-            return size;
+            return obj.size;
         } finally {
-            lock.unlock();
+            obj.lock.unlock();
         }
     }
 

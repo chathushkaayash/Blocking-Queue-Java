@@ -27,7 +27,7 @@ class Producer implements Runnable {
         while (true) {
             long time = System.currentTimeMillis();
             try {
-                this.queue.put("" + time);
+                BlockingQueue.put(queue, "" + time);
                 System.out.println("Produced: " + time);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -56,7 +56,7 @@ class Consumer implements Runnable {
     public void run() {
         while (true) {
             try {
-                System.out.println("Consumed: " + this.queue.take());
+                System.out.println("Consumed: " + BlockingQueue.take(queue));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
