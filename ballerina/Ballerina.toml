@@ -1,0 +1,11 @@
+[package]
+org = "ayash"
+name = "bq"
+version = "0.1.0"
+distribution = "2201.10.2"
+
+[build-options]
+observabilityIncluded = true
+
+[[platform.java17.dependency]]
+path = "../out/artifacts/BlockingQueueJava_jar/BlockingQueueJava.jar"

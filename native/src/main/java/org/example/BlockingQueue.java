@@ -1,20 +1,11 @@
 package org.example;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-
-// Available methods:
-// - add(Object item): boolean
-// - contains(Object item): boolean
-// - offer(Object item): boolean
-// - offer(Object item, long timeout ms): boolean
-// - put(Object item): void
-// - take(): Object
-
-// - peek(): Object
-// - isEmpty(): boolean
-// - isFull(): boolean
 
 public class BlockingQueue {
     public static void main(String[] args) {
@@ -35,12 +26,40 @@ public class BlockingQueue {
         queue = new Object[capacity];
     }
 
-    /**
-     * Inserts the specified element into this queue if it is possible to do so
-     * immediately without violating capacity restrictions
-     * <p>
-     * if no space is currently available. return IllegalStateException
-     */
+
+    public static void put(BlockingQueue obj, Object item) throws InterruptedException {
+        Objects.requireNonNull(item);
+        obj.lock.lockInterruptibly();
+        try {
+            while (obj.size == obj.capacity) {
+                obj.notFull.await();
+            }
+            obj.queue[obj.tail] = item;
+            obj.tail = (obj.tail + 1) % obj.capacity;
+            obj.size++;
+            obj.notEmpty.signal();
+        } finally {
+            obj.lock.unlock();
+        }
+    }
+
+
+    public static Object take(BlockingQueue obj) throws InterruptedException {
+        obj.lock.lockInterruptibly();
+        try {
+            while (obj.size == 0) {
+                obj.notEmpty.await();
+            }
+            Object item = obj.queue[obj.head];
+            obj.head = (obj.head + 1) % obj.capacity;
+            obj.size--;
+            obj.notFull.signal();
+            return item;
+        } finally {
+            obj.lock.unlock();
+        }
+    }
+
     public static boolean add(BlockingQueue obj, Object item) {
         Objects.requireNonNull(item);
         obj.lock.lock();
@@ -58,13 +77,6 @@ public class BlockingQueue {
         }
     }
 
-    /**
-     * Inserts the specified element at the tail of this queue
-     * if it is possible to do so immediately without exceeding the queue's capacity
-     * <p>
-     * return true upon success
-     * return false if this queue is full.
-     */
     public static boolean offer(BlockingQueue obj, Object item) {
         Objects.requireNonNull(item);
         obj.lock.lock();
@@ -82,19 +94,8 @@ public class BlockingQueue {
         }
     }
 
-    /**
-     * Inserts the specified element at the tail of this queue,
-     * waiting up to the specified wait time for space to become available if the queue is full
-     * <p>
-     * return true if successful
-     * false if the specified waiting time elapses before space is available
-     * <p>
-     * Throw InterruptedException if interrupted while waiting by other threads
-     */
     public static boolean offer(BlockingQueue obj, Object item, long timeout) throws InterruptedException {
         Objects.requireNonNull(item);
-        // lock.lock() ignores interruptions and keeps trying to acquire the lock.
-        // lock.lockInterruptibly If we want to support interruption, we should use lockInterruptibly instead of lock()
         obj.lock.lockInterruptibly();
         try {
             long nanos = timeout * 1_000_000;
@@ -102,7 +103,7 @@ public class BlockingQueue {
                 if (nanos <= 0) {
                     return false;
                 }
-                nanos = obj.notFull.awaitNanos(nanos); // return remaining time to wait if waked up by signal
+                nanos = obj.notFull.awaitNanos(nanos);
             }
             obj.queue[obj.tail] = item;
             obj.tail = (obj.tail + 1) % obj.capacity;
@@ -114,39 +115,6 @@ public class BlockingQueue {
         }
     }
 
-    public static void put(BlockingQueue obj, Object item) throws InterruptedException {
-        Objects.requireNonNull(item);
-        // lock.lock() ignores interruptions and keeps trying to acquire the lock.
-        // lock.lockInterruptibly If we want to support interruption, we should use lockInterruptibly instead of lock()
-        obj.lock.lockInterruptibly();
-        try {
-            while (obj.size == obj.capacity) {
-                obj.notFull.await(); // This can throw InterruptedException when system interrupt the thread
-            }
-            obj.queue[obj.tail] = item;
-            obj.tail = (obj.tail + 1) % obj.capacity;
-            obj.size++;
-            obj.notEmpty.signal();
-        } finally {
-            obj.lock.unlock();
-        }
-    }
-
-    public static Object take(BlockingQueue obj) throws InterruptedException {
-        obj.lock.lockInterruptibly();
-        try {
-            while (obj.size == 0) {
-                obj.notEmpty.await();
-            }
-            Object item = obj.queue[obj.head];
-            obj.head = (obj.head + 1) % obj.capacity;
-            obj.size--;
-            obj.notFull.signal();
-            return item;
-        } finally {
-            obj.lock.unlock();
-        }
-    }
 
     public static boolean contains(BlockingQueue obj, Object item) {
         Objects.requireNonNull(item);
@@ -192,7 +160,6 @@ public class BlockingQueue {
             obj.lock.unlock();
         }
     }
-
 
     public static int size(BlockingQueue obj) {
         obj.lock.lock();
