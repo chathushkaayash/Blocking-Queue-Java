@@ -1,0 +1,23 @@
+[package]
+org = "ballerina"
+name = "blockingqueue"
+version = "0.1.0"
+authors = ["Ballerina"]
+export = ["blockingqueue"]
+keywords = ["blocking", "queue", "blockingqueue", "blocking-queue"]
+#repository = "https://github.com/ballerina-platform/module-ballerina-blockingqueue"
+license = ["Apache-2.0"]
+distribution = "2201.10.2"
+
+[build-options]
+observabilityIncluded = true
+
+
+#[[platform.java21.dependency]]
+#groupId = "io.ballerina.lib"
+#artifactId = "blockingqueue-native"
+#version = "@toml.version@"
+#path = "../native/build/libs/blockingqueue-native-@project.version@.jar"
+
+[[platform.java17.dependency]]
+path = "../out/artifacts/BlockingQueueJava_jar/BlockingQueueJava.jar"

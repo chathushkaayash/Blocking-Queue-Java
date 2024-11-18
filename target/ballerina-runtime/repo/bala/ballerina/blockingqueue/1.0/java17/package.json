@@ -1,0 +1,30 @@
+{
+  "organization": "ballerina",
+  "name": "blockingqueue",
+  "version": "0.1.0",
+  "licenses": [
+    "Apache-2.0"
+  ],
+  "authors": [
+    "Ballerina"
+  ],
+  "keywords": [
+    "blocking",
+    "queue",
+    "blockingqueue",
+    "blocking-queue"
+  ],
+  "export": [
+    "blockingqueue"
+  ],
+  "ballerina_version": "2201.10.2",
+  "implementation_vendor": "WSO2",
+  "language_spec_version": "2024R1",
+  "platform": "java17",
+  "platformDependencies": [
+    {
+      "path": "platform\\java17\\BlockingQueueJava.jar"
+    }
+  ],
+  "template": false
+}

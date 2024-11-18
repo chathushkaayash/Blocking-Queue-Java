@@ -17,36 +17,94 @@
  */
 
 plugins {
-    id 'java'
+    id 'io.ballerina.plugin'
 }
 
 
-description = 'Ballerina - Blocking Queue Native'
+description = 'Ballerina - Blocking Queue Ballerina'
+
+def packageName = "blockingqueue"
+def packageOrg = "ballerina"
+
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
+def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
+
+def stripBallerinaExtensionVersion(String extVersion) {
+    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
+        def splitVersion = extVersion.split('-')
+        if (splitVersion.length > 3) {
+            def strippedValues = splitVersion[0..-4]
+            return strippedValues.join('-')
+        } else {
+            return extVersion
+        }
+    } else {
+        return extVersion.replace("${project.ext.snapshotVersion}", "")
+    }
+}
+
+apply plugin: 'io.ballerina.plugin'
+
+ballerina {
+    packageOrganization = packageOrg
+    module = packageName
+    langVersion = ballerinaLangVersion
+}
+
+configurations {
+    externalJars
+}
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-
-//    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
-//    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
+    jbalTools("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+        transitive = false
+    }
 }
 
-//def excludePattern = '**/module-info.java'
-//tasks.withType(Checkstyle) {
-//    exclude excludePattern
-//}
+task updateTomlFiles {
+    doLast {
+        def newConfig = ballerinaTomlFilePlaceHolder.text.replace("@project.version@", project.version)
+        newConfig = newConfig.replace("@toml.version@", tomlVersion)
+        ballerinaTomlFile.text = newConfig
+    }
+}
 
-compileJava {
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
+task commitTomlFiles {
+    doLast {
+//        project.exec {
+//            ignoreExitValue true
+//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the native jar versions\" Ballerina.toml Dependencies.toml"
+//            } else {
+//                commandLine 'sh', '-c', "git commit -m '[Automated] Update the native jar versions' Ballerina.toml Dependencies.toml"
+//            }
+//        }
     }
 }
 
 
-test {
-    useJUnitPlatform()
-}
+updateTomlFiles.dependsOn copyStdlibs
+
+test.dependsOn ":blockingqueue-native:build"
+
+build.dependsOn ":blockingqueue-native:build"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
