@@ -22,7 +22,7 @@ public class BlockingQueue {
     # + item - The element to add to the queue.
     # + return - Returns an error if an issue occurs while adding the item.
     public isolated function put(anydata item) returns error? {
-        if (item == null) {
+        if item is () {
             return error("NullPointerException");
         }
         return put(self.jObj, item);
