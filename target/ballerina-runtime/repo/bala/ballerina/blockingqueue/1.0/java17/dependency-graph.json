@@ -1,7 +1,7 @@
 {
   "packages": [
     {
-      "org": "ballerina",
+      "org": "ayash",
       "name": "blockingqueue",
       "version": "0.1.0",
       "transitive": false,
@@ -28,7 +28,7 @@
   ],
   "modules": [
     {
-      "org": "ballerina",
+      "org": "ayash",
       "package_name": "blockingqueue",
       "version": "0.1.0",
       "module_name": "blockingqueue",

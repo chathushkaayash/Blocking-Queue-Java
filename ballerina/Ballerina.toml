@@ -1,11 +1,11 @@
 [package]
-org = "ballerina"
+org = "ayash"
 name = "blockingqueue"
 version = "0.1.0"
-authors = ["Ballerina"]
+authors = ["ayash"]
 export = ["blockingqueue"]
-keywords = ["blocking", "queue", "blockingqueue", "blocking-queue"]
-#repository = "https://github.com/ballerina-platform/module-ballerina-blockingqueue"
+keywords = ["blockingqueue", "concurrency","thread-safe"]
+repository = "https://github.com/chathushkaayash/ballerina-blocking-queue"
 license = ["Apache-2.0"]
 distribution = "2201.10.2"
 
@@ -13,11 +13,9 @@ distribution = "2201.10.2"
 observabilityIncluded = true
 
 
-#[[platform.java21.dependency]]
-#groupId = "io.ballerina.lib"
-#artifactId = "blockingqueue-native"
-#version = "1.0"
-#path = "../native/build/libs/blockingqueue-native-1.0-SNAPSHOT.jar"
-
 [[platform.java17.dependency]]
-path = "../out/artifacts/BlockingQueueJava_jar/BlockingQueueJava.jar"
+groupId = "io.ayash"
+artifactId = "blockingqueue-native"
+version = "1.0"
+path = "../native/build/libs/blockingqueue-native-1.0-SNAPSHOT.jar"
+

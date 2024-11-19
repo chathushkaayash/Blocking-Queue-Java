@@ -8,7 +8,7 @@ dependencies-toml-version = "2"
 distribution-version = "2201.10.2"
 
 [[package]]
-org = "ballerina"
+org = "ayash"
 name = "blockingqueue"
 version = "0.1.0"
 dependencies = [
@@ -17,7 +17,7 @@ dependencies = [
 	{org = "ballerina", name = "test"}
 ]
 modules = [
-	{org = "ballerina", packageName = "blockingqueue", moduleName = "blockingqueue"}
+	{org = "ayash", packageName = "blockingqueue", moduleName = "blockingqueue"}
 ]
 
 [[package]]

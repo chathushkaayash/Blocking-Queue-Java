@@ -1,18 +1,18 @@
 {
-  "organization": "ballerina",
+  "organization": "ayash",
   "name": "blockingqueue",
   "version": "0.1.0",
   "licenses": [
     "Apache-2.0"
   ],
   "authors": [
-    "Ballerina"
+    "ayash"
   ],
+  "source_repository": "https://github.com/chathushkaayash/ballerina-blocking-queue",
   "keywords": [
-    "blocking",
-    "queue",
     "blockingqueue",
-    "blocking-queue"
+    "concurrency",
+    "thread-safe"
   ],
   "export": [
     "blockingqueue"
@@ -23,7 +23,10 @@
   "platform": "java17",
   "platformDependencies": [
     {
-      "path": "platform\\java17\\BlockingQueueJava.jar"
+      "path": "platform\\java17\\blockingqueue-native-1.0-SNAPSHOT.jar",
+      "artifactId": "blockingqueue-native",
+      "groupId": "io.ayash",
+      "version": "1.0"
     }
   ],
   "template": false
