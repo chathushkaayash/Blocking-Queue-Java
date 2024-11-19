@@ -1,29 +1,56 @@
-plugins {
-    id 'java'
-}
-
 allprojects {
+    group = project.group
+    version = project.version
+
+
     repositories {
-        mavenCentral()
+        mavenLocal()
+        maven {
+            url = 'https://maven.wso2.org/nexus/content/repositories/releases/'
+        }
+
+        maven {
+            url = 'https://mvnrepository.com/artifact/org.testng/testng'
+        }
+
+        maven {
+            url = 'https://maven.wso2.org/nexus/content/groups/wso2-public/'
+        }
+
+        maven {
+            url = 'https://repo.maven.apache.org/maven2'
+        }
+
+        maven {
+            url = 'https://maven.pkg.github.com/ballerina-platform/*'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+    }
+    ext {
+        snapshotVersion = '-SNAPSHOT'
+        timestampedVersionRegex = '.*-\\d{8}-\\d{6}-\\w.*\$'
     }
 }
 
 subprojects {
-    apply plugin: 'java'
-
-    repositories {
-        mavenCentral()
+    configurations {
+        ballerinaStdLibs
+        jbalTools
     }
-
-    group = 'org.example'
-    version = '1.0-SNAPSHOT'
-
     dependencies {
-        testImplementation platform('org.junit:junit-bom:5.10.0')
-        testImplementation 'org.junit.jupiter:junit-jupiter'
+        jbalTools("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
+            transitive = false
+        }
     }
+}
 
-    test {
-        useJUnitPlatform()
-    }
+def moduleVersion = project.version.replace("-SNAPSHOT", "")
+
+
+task build {
+    dependsOn("blockingqueue-native:build")
+    dependsOn("blockingqueue-ballerina:build")
 }

@@ -22,7 +22,7 @@ public class BlockingQueue {
     # + item - The element to add to the queue.
     # + return - Returns an error if an issue occurs while adding the item.
     public isolated function put(anydata item) returns error? {
-        if (item == null) {
+        if item is () {
             return error("NullPointerException");
         }
         return put(self.jObj, item);
@@ -129,58 +129,58 @@ public class BlockingQueue {
 
 isolated function BlockingQueueConstructor(int size) returns handle = @java:Constructor {
     paramTypes: ["int"],
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function put(handle jObj, anydata item) returns error? = @java:Method {
-    paramTypes: ["org.example.BlockingQueue", "java.lang.Object"],
+    paramTypes: ["io.ayash.BlockingQueue", "java.lang.Object"],
     name: "put",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function take(handle jObj) returns anydata|error = @java:Method {
-    paramTypes: ["org.example.BlockingQueue"],
+    paramTypes: ["io.ayash.BlockingQueue"],
     name: "take",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function add(handle jObj, anydata item) returns boolean = @java:Method {
-    paramTypes: ["org.example.BlockingQueue", "java.lang.Object"],
+    paramTypes: ["io.ayash.BlockingQueue", "java.lang.Object"],
     name: "add",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function offer(handle jObj, anydata item) returns boolean = @java:Method {
-    paramTypes: ["org.example.BlockingQueue", "java.lang.Object"],
+    paramTypes: ["io.ayash.BlockingQueue", "java.lang.Object"],
     name: "offer",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function contains(handle jObj, anydata item) returns boolean = @java:Method {
-    paramTypes: ["org.example.BlockingQueue", "java.lang.Object"],
+    paramTypes: ["io.ayash.BlockingQueue", "java.lang.Object"],
     name: "contains",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function peek(handle jObj) returns anydata|error = @java:Method {
-    paramTypes: ["org.example.BlockingQueue"],
+    paramTypes: ["io.ayash.BlockingQueue"],
     name: "peek",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function isEmpty(handle jObj) returns boolean = @java:Method {
-    paramTypes: ["org.example.BlockingQueue"],
+    paramTypes: ["io.ayash.BlockingQueue"],
     name: "isEmpty",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function isFull(handle jObj) returns boolean = @java:Method {
-    paramTypes: ["org.example.BlockingQueue"],
+    paramTypes: ["io.ayash.BlockingQueue"],
     name: "isFull",
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
 isolated function size(handle jObj) returns int = @java:Method {
-    'class: "org.example.BlockingQueue"
+    'class: "io.ayash.BlockingQueue"
 } external;
 
