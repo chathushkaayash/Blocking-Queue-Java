@@ -5,14 +5,14 @@ import ballerina/test;
 
 // ----------------------- NullPointer tests --------------------------------
 
-@test:Config {}
+@test:Config {groups: ["g1"]}
 function checkNullPointerInOffer() returns error? {
     BlockingQueue queue = new BlockingQueue(5);
     boolean|error offerResult = queue.offer(null);
     test:assertTrue(offerResult is error, msg = "NullPointerException expected");
 }
 
-@test:Config {}
+@test:Config {groups: ["g1"]}
 function checkNullPointerInAdd() returns error? {
     BlockingQueue queue = new BlockingQueue(5);
     boolean|error addResult = queue.add(null);
