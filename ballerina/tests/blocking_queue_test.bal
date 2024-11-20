@@ -7,21 +7,21 @@ import ballerina/test;
 
 @test:Config {groups: ["g1"]}
 function checkNullPointerInOffer() returns error? {
-    BlockingQueue queue = new BlockingQueue(5);
-    boolean|error offerResult = queue.offer(null);
+    BlockingQueue queue = check new BlockingQueue(5);
+    boolean|error offerResult = queue.offer(null, 1000);
     test:assertTrue(offerResult is error, msg = "NullPointerException expected");
 }
 
 @test:Config {groups: ["g1"]}
 function checkNullPointerInAdd() returns error? {
-    BlockingQueue queue = new BlockingQueue(5);
+    BlockingQueue queue = check new BlockingQueue(5);
     boolean|error addResult = queue.add(null);
     test:assertTrue(addResult is error, msg = "NullPointerException expected");
 }
 
 @test:Config {}
 function checkNullPointerInPut() returns error? {
-    BlockingQueue queue = new BlockingQueue(5);
+    BlockingQueue queue = check new BlockingQueue(5);
     error? putResult = queue.put(null);
     test:assertTrue(putResult is error, msg = "NullPointerException expected");
 
@@ -31,18 +31,31 @@ function checkNullPointerInPut() returns error? {
 
 @test:Config {}
 function testInitialState() returns error? {
-    BlockingQueue queue = new BlockingQueue(5);
+    BlockingQueue queue = check new BlockingQueue(5);
     test:assertTrue(queue.isEmpty());
     test:assertEquals(queue.size(), 0);
     test:assertFalse(queue.isFull());
     test:assertEquals(queue.peek(), null);
 }
 
+// ----------------------- Test size Argument ---------------------
+@test:Config {}
+function testSizeArgument() returns error? {
+    BlockingQueue|error queue = new BlockingQueue(0);
+    test:assertTrue(queue is error, msg = "Queue size should be greater than 0");
+
+    queue = new BlockingQueue(-1);
+    test:assertTrue(queue is error, msg = "Queue size should be greater than 0");
+
+    queue = new BlockingQueue(5);
+    test:assertFalse(queue is error, msg = "Queue size should be greater than 0");
+}
+
 // // ----------------------- Test add and remove elements ---------------------
 
 @test:Config {}
 function testAddAndRemoveElements() returns error? {
-    BlockingQueue queue = new BlockingQueue(5);
+    BlockingQueue queue = check new BlockingQueue(5);
     check queue.put("1");
     check queue.put("2");
     check queue.put("3");
@@ -58,7 +71,7 @@ function testAddAndRemoveElements() returns error? {
     test:assertTrue(queue.isFull(), msg = "Queue should be full");
 
     // try to add more elements
-    test:assertFalse(check queue.offer("6"), msg = "Offer should return false when queue is full");
+    test:assertFalse(check queue.offer("6", 1000), msg = "Offer should return false when queue is full");
 
     test:assertEquals(queue.take(), "1", msg = "Take should return '1'");
     test:assertEquals(queue.take(), "2", msg = "Take should return '2'");
@@ -73,7 +86,7 @@ function testAddAndRemoveElements() returns error? {
 
 @test:Config {}
 function testBlockingOnFullQueue() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
+    BlockingQueue queue = check new BlockingQueue(2);
     check queue.put(1);
     check queue.put(2);
 
@@ -87,7 +100,7 @@ function testBlockingOnFullQueue() returns error? {
 
 @test:Config {}
 function testBlockingOnEmptyQueue() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
+    BlockingQueue queue = check new BlockingQueue(2);
 
     future<int[]|error?> futureResult = start consumer(queue, 3);
 
@@ -104,7 +117,7 @@ function testBlockingOnEmptyQueue() returns error? {
 
 @test:Config {}
 function testConcurrentAccess() returns error? {
-    BlockingQueue queue = new BlockingQueue(5);
+    BlockingQueue queue = check new BlockingQueue(5);
 
     int[] values = [1, 2, 3, 4, 5];
 
@@ -120,7 +133,7 @@ function testConcurrentAccess() returns error? {
 // ----------------------- Test Add ---------------------
 @test:Config {}
 function testAdd() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
+    BlockingQueue queue = check new BlockingQueue(2);
     test:assertTrue(check queue.add(1));
     test:assertTrue(check queue.add(2));
 
@@ -134,7 +147,7 @@ function testAdd() returns error? {
 // ----------------------- Test Contains ---------------------
 @test:Config {}
 function testContains() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
+    BlockingQueue queue = check new BlockingQueue(2);
     check queue.put(1);
     check queue.put(2);
 
@@ -146,20 +159,20 @@ function testContains() returns error? {
 // ----------------------- Test Offer ---------------------
 @test:Config {}
 function testOffer() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
-    test:assertTrue(check queue.offer(1));
-    test:assertTrue(check queue.offer(2));
+    BlockingQueue queue = check new BlockingQueue(2);
+    test:assertTrue(check queue.offer(1, 1000));
+    test:assertTrue(check queue.offer(2, 1000));
 
     test:assertEquals(queue.size(), 2);
     test:assertTrue(queue.isFull());
 
-    test:assertFalse(check queue.offer(3));
+    test:assertFalse(check queue.offer(3, 1000));
 }
 
 // ----------------------- Test Peek ---------------------
 @test:Config {}
 function testPeek() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
+    BlockingQueue queue = check new BlockingQueue(2);
     check queue.put(1);
     check queue.put(2);
 
@@ -170,7 +183,7 @@ function testPeek() returns error? {
 // ----------------------- Test IsEmpty ---------------------
 @test:Config {}
 function testIsEmpty() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
+    BlockingQueue queue = check new BlockingQueue(2);
     test:assertTrue(queue.isEmpty());
 
     check queue.put(1);
@@ -180,7 +193,7 @@ function testIsEmpty() returns error? {
 // ----------------------- Test IsFull ---------------------
 @test:Config {}
 function testIsFull() returns error? {
-    BlockingQueue queue = new BlockingQueue(2);
+    BlockingQueue queue = check new BlockingQueue(2);
     test:assertFalse(queue.isFull());
 
     check queue.put(1);

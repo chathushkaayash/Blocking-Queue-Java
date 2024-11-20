@@ -9,9 +9,16 @@ public class BallerinaToNativeWrapper {
     private BallerinaToNativeWrapper() {
     }
 
-    public static void init(BObject bBlockingQueue, int size) {
-        BlockingQueue nativeBlockingQueue = new BlockingQueue(size);
-        bBlockingQueue.addNativeData(NATIVE_QUEUE, nativeBlockingQueue);
+    public static Object init(BObject bBlockingQueue, int size) {
+        try {
+            BlockingQueue nativeBlockingQueue = new BlockingQueue(size);
+            bBlockingQueue.addNativeData(NATIVE_QUEUE, nativeBlockingQueue);
+        } catch (Exception e) {
+            String errorMsg = String.format("Error occurred while initializing the queue: %s",
+                    e.getMessage());
+            return CommonUtils.createError(errorMsg, e);
+        }
+        return null;
     }
 
     public static Object put(BObject bBlockingQueue, Object item) {
@@ -39,10 +46,10 @@ public class BallerinaToNativeWrapper {
         }
     }
 
-    public static Object offer(BObject bBlockingQueue, Object item) {
+    public static Object offer(BObject bBlockingQueue, Object item, long timeout) {
         BlockingQueue nativeBlockingQueue = (BlockingQueue) bBlockingQueue.getNativeData(NATIVE_QUEUE);
         try {
-            return nativeBlockingQueue.offer(item);
+            return nativeBlockingQueue.offer(item, timeout);
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while offering item to the queue: %s",
                     e.getMessage());

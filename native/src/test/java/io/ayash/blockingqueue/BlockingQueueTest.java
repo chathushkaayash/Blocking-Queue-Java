@@ -12,7 +12,7 @@ class BlockingQueueTest {
     @Test
     void checkNullPointerInOffer() {
         BlockingQueue queue = new BlockingQueue(5);
-        assertThrows(NullPointerException.class, () -> queue.offer(null));
+        assertThrows(NullPointerException.class, () -> queue.offer(null, 1000));
     }
 
     @Test
@@ -58,7 +58,7 @@ class BlockingQueueTest {
         assertTrue(queue.isFull());
 
         // try to add more elements
-        assertFalse(queue.offer("6"));
+        assertFalse(queue.offer("6", 1000));
 
         assertEquals("1", queue.take());
         assertEquals("2", queue.take());
@@ -220,15 +220,6 @@ class BlockingQueueTest {
         assertFalse(queue.contains(4));
     }
 
-    // ----------------------- Test offer ---------------------
-    @Test
-    public void testOffer() {
-        BlockingQueue queue = new BlockingQueue(2);
-        assertTrue(queue.offer(1));
-        assertTrue(queue.offer(2));
-        assertFalse(queue.offer(3)); // This should return false since the queue is full
-    }
-
     // ----------------------- Test peek ---------------------
     @Test
     public void testPeek() throws InterruptedException {
@@ -276,6 +267,4 @@ class BlockingQueueTest {
         queue.take();
         assertFalse(queue.isFull());
     }
-
-    //
 }

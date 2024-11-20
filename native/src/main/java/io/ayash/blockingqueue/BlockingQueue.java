@@ -14,21 +14,22 @@ public class BlockingQueue {
     private int tail = 0; // next available slot
     private int size = 0;
 
-    public BlockingQueue(int capacity) {
+    public BlockingQueue(int capacity) throws IllegalArgumentException {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be greater than zero");
+        }
         this.capacity = capacity;
         queue = new Object[capacity];
     }
 
     public void put(Object item) throws InterruptedException {
-        Objects.requireNonNull(item);
+        Objects.requireNonNull(item, "Item cannot be null");
         lock.lockInterruptibly();
         try {
             while (size == capacity) {
                 notFull.await();
             }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
+            enqueue(item);
             notEmpty.signal();
         } finally {
             lock.unlock();
@@ -41,9 +42,7 @@ public class BlockingQueue {
             while (size == 0) {
                 notEmpty.await();
             }
-            Object item = queue[head];
-            head = (head + 1) % capacity;
-            size--;
+            Object item = dequeue();
             notFull.signal();
             return item;
         } finally {
@@ -52,32 +51,13 @@ public class BlockingQueue {
     }
 
     public boolean add(Object item) {
-        Objects.requireNonNull(item);
+        Objects.requireNonNull(item, "Item cannot be null");
         lock.lock();
         try {
             if (size == capacity) {
                 throw new IllegalStateException("Queue is full");
             }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
-            notEmpty.signal();
-            return true;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public boolean offer(Object item) {
-        Objects.requireNonNull(item);
-        lock.lock();
-        try {
-            if (size == capacity) {
-                return false;
-            }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
+            enqueue(item);
             notEmpty.signal();
             return true;
         } finally {
@@ -86,7 +66,7 @@ public class BlockingQueue {
     }
 
     public boolean offer(Object item, long timeout) throws InterruptedException {
-        Objects.requireNonNull(item);
+        Objects.requireNonNull(item, "Item cannot be null");
         lock.lockInterruptibly();
         try {
             long nanos = timeout * 1_000_000;
@@ -96,9 +76,7 @@ public class BlockingQueue {
                 }
                 nanos = notFull.awaitNanos(nanos);
             }
-            queue[tail] = item;
-            tail = (tail + 1) % capacity;
-            size++;
+            enqueue(item);
             notEmpty.signal();
             return true;
         } finally {
@@ -107,7 +85,7 @@ public class BlockingQueue {
     }
 
     public boolean contains(Object item) {
-        Objects.requireNonNull(item);
+        Objects.requireNonNull(item, "Item cannot be null");
         lock.lock();
         try {
             for (int i = 0; i < size; i++) {
@@ -124,10 +102,7 @@ public class BlockingQueue {
     public Object peek() {
         lock.lock();
         try {
-            if (size == 0) {
-                return null;
-            }
-            return queue[head];
+            return size == 0 ? null : queue[head];
         } finally {
             lock.unlock();
         }
@@ -160,4 +135,17 @@ public class BlockingQueue {
         }
     }
 
+    // Helper Methods
+    private void enqueue(Object item) {
+        queue[tail] = item;
+        tail = (tail + 1) % capacity;
+        size++;
+    }
+
+    private Object dequeue() {
+        Object item = queue[head];
+        head = (head + 1) % capacity;
+        size--;
+        return item;
+    }
 }

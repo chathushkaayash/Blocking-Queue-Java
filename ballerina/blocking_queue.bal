@@ -8,11 +8,11 @@ public class BlockingQueue {
     # BlockingQueue queue = new BlockingQueue(10);
     # ```
     # + size - The size of the queue.
-    public function init(int size) {
-        self.externInit(size);
+    public function init(int size) returns Error? {
+        check self.externInit(size);
     }
 
-    isolated function externInit(int size) = @java:Method {
+    isolated function externInit(int size) returns Error? = @java:Method {
         name: "init",
         'class: "io.ayash.blockingqueue.BallerinaToNativeWrapper"
     } external;
@@ -25,7 +25,7 @@ public class BlockingQueue {
     #
     # + item - The element to add to the queue.
     # + return - Returns an error if an issue occurs while putting the item.
-    isolated function put(anydata item) returns error?  = @java:Method {
+    isolated function put(anydata item) returns Error? = @java:Method {
         'class: "io.ayash.blockingqueue.BallerinaToNativeWrapper"
     } external;
 
@@ -37,19 +37,20 @@ public class BlockingQueue {
     #
     # + return - Returns the head of the queue.
     # + return - Returns an error if an issue occurs while taking the item.
-    isolated function take() returns anydata|error = @java:Method {
+    isolated function take() returns anydata|Error = @java:Method {
         'class: "io.ayash.blockingqueue.BallerinaToNativeWrapper"
     } external;
 
-    # Inserts the specified element into this queue if it is possible to do so immediately without violating capacity restrictions.
+    # Inserts the specified element into this queue, waiting up to the specified wait time if necessary for space to become available.
     #
     # ```ballerina
     # queue.offer(10);
     # ```
     # + item - The element to add to the queue.
+    # + timeout - The time to wait for the operation to complete.
     #
     # + return - Returns true if the element was added to this queue, else false.
-    isolated function offer(anydata item) returns boolean|error = @java:Method {
+    isolated function offer(anydata item, int timeout) returns boolean|Error = @java:Method {
         'class: "io.ayash.blockingqueue.BallerinaToNativeWrapper"
     } external;
 
@@ -70,8 +71,8 @@ public class BlockingQueue {
     # queue.add(10);
     # ```
     # + item - The element to add to the queue.
-    # + return - returns true upon success and throwing an IllegalStateException if no space is currently available
-    isolated function add(anydata item) returns boolean|error = @java:Method {
+    # + return - returns true upon success and returns an error if no space is available.
+    isolated function add(anydata item) returns true|Error = @java:Method {
         'class: "io.ayash.blockingqueue.BallerinaToNativeWrapper"
     } external;
 
@@ -80,7 +81,7 @@ public class BlockingQueue {
     # queue.peek();
     # ```
     # + return - Returns the head of the queue. Returns null if the queue is empty.
-    isolated function peek() returns anydata|error = @java:Method {
+    isolated function peek() returns anydata|Error = @java:Method {
         'class: "io.ayash.blockingqueue.BallerinaToNativeWrapper"
     } external;
 
@@ -90,7 +91,6 @@ public class BlockingQueue {
     # queue.size();
     # ```
     # + return - Returns the number of elements in the queue.
-    # + return - Returns an error if an issue occurs while getting the size.
     isolated function size() returns int = @java:Method {
         'class: "io.ayash.blockingqueue.BallerinaToNativeWrapper"
     } external;
