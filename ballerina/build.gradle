@@ -1,5 +1,5 @@
 plugins {
-    id 'io.ballerina.plugin'
+    id "io.ballerina.plugin" version "${ballerinaGradlePluginVersion}"
 }
 
 

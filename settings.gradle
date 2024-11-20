@@ -2,7 +2,6 @@
 pluginManagement {
     plugins {
         id "io.ballerina.plugin" version "${ballerinaGradlePluginVersion}"
-
     }
 
     repositories {
