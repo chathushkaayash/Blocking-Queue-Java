@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Use the secret
+      - name: Use a Secret
+        run: echo ${{ secrets.packageUser }}
+
       # Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
