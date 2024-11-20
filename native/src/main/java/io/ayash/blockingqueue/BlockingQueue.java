@@ -35,7 +35,6 @@ public class BlockingQueue {
         }
     }
 
-
     public Object take() throws InterruptedException {
         lock.lockInterruptibly();
         try {
@@ -106,7 +105,6 @@ public class BlockingQueue {
             lock.unlock();
         }
     }
-
 
     public boolean contains(Object item) {
         Objects.requireNonNull(item);
