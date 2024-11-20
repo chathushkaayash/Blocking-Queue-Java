@@ -11,12 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set Environment Variables
-        env:
-          packageUser: ${{ secrets.packageUser }}
-          packagePAT: ${{ secrets.packagePAT }}
-        run: echo "Environment variables set"
-
       # Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -38,4 +32,7 @@ jobs:
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
       - name: Build with Gradle
+        env:
+          packageUser: ${{ secrets.packageUser }}
+          packagePAT: ${{ secrets.packagePAT }}
         run: ./gradlew clean build
