@@ -188,7 +188,6 @@ function testIsFull() returns error? {
     test:assertTrue(queue.isFull());
 }
 
-
 function producer(BlockingQueue queue, int[] values, decimal delay = 0) returns error? {
     foreach int item in values {
         runtime:sleep(delay);
