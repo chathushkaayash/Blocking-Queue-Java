@@ -12,15 +12,12 @@ jobs:
 
     
     steps:
-      - name: Set Up Environment Variables
-        run: |
-          echo "packageUser=${{ secrets.packageUser }}" >> $GITHUB_ENV
-          echo "packagePAT=${{ secrets.packagePAT }}" >> $GITHUB_ENV
-          
-      # Use the secret
-      - name: Use a Secret
-        run: echo ${{ secrets.packageUser }}
-
+      - name: Set Environment Variables
+        env:
+          packageUser: ${{ secrets.packageUser }}
+          packagePAT: ${{ secrets.packagePAT }}
+        run: echo "Environment variables set"
+        
       # Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
