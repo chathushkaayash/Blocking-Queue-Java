@@ -1,4 +1,4 @@
-package io.ayash;
+package io.ayash.blockingqueue;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,29 +12,29 @@ class BlockingQueueTest {
     @Test
     void checkNullPointerInOffer() {
         BlockingQueue queue = new BlockingQueue(5);
-        assertThrows(NullPointerException.class, () -> BlockingQueue.offer(queue, null));
+        assertThrows(NullPointerException.class, () -> queue.offer( null));
     }
 
     @Test
     void checkNullPointerInAdd() {
         BlockingQueue queue = new BlockingQueue(5);
-        assertThrows(NullPointerException.class, () -> BlockingQueue.add(queue, null));
+        assertThrows(NullPointerException.class, () -> queue.add( null));
     }
 
     @Test
     void checkNullPointerInPut() {
         BlockingQueue queue = new BlockingQueue(5);
-        assertThrows(NullPointerException.class, () -> BlockingQueue.put(queue, null));
+        assertThrows(NullPointerException.class, () -> queue.put( null));
     }
 
     // ----------------------- Test Initial State ---------------------
     @Test
     public void testInitialState() {
         BlockingQueue queue = new BlockingQueue(5);
-        assertTrue(BlockingQueue.isEmpty(queue));
-        assertEquals(0, BlockingQueue.size(queue));
-        assertFalse(BlockingQueue.isFull(queue));
-        assertNull(BlockingQueue.peek(queue));
+        assertTrue(queue.isEmpty());
+        assertEquals(0, queue.size());
+        assertFalse(queue.isFull());
+        assertNull(queue.peek());
     }
 
     // ----------------------- Test add and remove elements ---------------------
@@ -42,46 +42,46 @@ class BlockingQueueTest {
     public void testAddAndRemoveElements() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(5);
 
-        BlockingQueue.put(queue, "1");
-        BlockingQueue.put(queue, "2");
-        BlockingQueue.put(queue, "3");
+        queue.put( "1");
+        queue.put( "2");
+        queue.put( "3");
 
-        assertEquals(3, BlockingQueue.size(queue));
-        assertFalse(BlockingQueue.isEmpty(queue));
-        assertFalse(BlockingQueue.isFull(queue));
+        assertEquals(3, queue.size());
+        assertFalse(queue.isEmpty());
+        assertFalse(queue.isFull());
 
-        BlockingQueue.put(queue, "4");
-        BlockingQueue.put(queue, "5");
+        queue.put( "4");
+        queue.put( "5");
 
-        assertEquals(5, BlockingQueue.size(queue));
-        assertFalse(BlockingQueue.isEmpty(queue));
-        assertTrue(BlockingQueue.isFull(queue));
+        assertEquals(5, queue.size());
+        assertFalse(queue.isEmpty());
+        assertTrue(queue.isFull());
 
         // try to add more elements
-        assertFalse(BlockingQueue.offer(queue, "6"));
+        assertFalse(queue.offer( "6"));
 
-        assertEquals("1", BlockingQueue.take(queue));
-        assertEquals("2", BlockingQueue.take(queue));
-        assertEquals("3", BlockingQueue.take(queue));
-        assertEquals("4", BlockingQueue.take(queue));
-        assertEquals("5", BlockingQueue.take(queue));
+        assertEquals("1", queue.take());
+        assertEquals("2", queue.take());
+        assertEquals("3", queue.take());
+        assertEquals("4", queue.take());
+        assertEquals("5", queue.take());
 
-        assertEquals(0, BlockingQueue.size(queue));
-        assertTrue(BlockingQueue.isEmpty(queue));
-        assertFalse(BlockingQueue.isFull(queue));
-        assertNull(BlockingQueue.peek(queue));
+        assertEquals(0, queue.size());
+        assertTrue(queue.isEmpty());
+        assertFalse(queue.isFull());
+        assertNull(queue.peek());
     }
 
     // ----------------------- Blocking Tests ---------------------
     @Test
     public void testBlockingOnFullQueue() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(2);
-        BlockingQueue.put(queue, 1);
-        BlockingQueue.put(queue, 2);
+        queue.put( 1);
+        queue.put( 2);
 
         Thread putThread = new Thread(() -> {
             try {
-                BlockingQueue.put(queue, 3);  // This should block since the queue is full
+                queue.put( 3);  // This should block since the queue is full
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -93,7 +93,7 @@ class BlockingQueueTest {
         assertTrue(putThread.isAlive());
 
         // Now take an element from the queue to unblock the putThread
-        BlockingQueue.take(queue);
+        queue.take();
         Thread.sleep(500);  // Give some time for putThread to complete
         assertFalse(putThread.isAlive());
     }
@@ -104,7 +104,7 @@ class BlockingQueueTest {
 
         Thread takeThread = new Thread(() -> {
             try {
-                BlockingQueue.take(queue);  // This should block since the queue is empty
+                queue.take();  // This should block since the queue is empty
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -116,7 +116,7 @@ class BlockingQueueTest {
         assertTrue(takeThread.isAlive());
 
         // Now add an element to the queue to unblock the takeThread
-        BlockingQueue.put(queue, 1);
+        queue.put( 1);
         Thread.sleep(500);  // Give some time for takeThread to complete
         assertFalse(takeThread.isAlive());
     }
@@ -130,7 +130,7 @@ class BlockingQueueTest {
             for (int i = 0; i < 1000; i++) {
                 try {
                     Thread.sleep(new Random().nextInt(10));
-                    BlockingQueue.put(queue, i);
+                    queue.put( i);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -141,7 +141,7 @@ class BlockingQueueTest {
             for (int i = 0; i < 1000; i++) {
                 try {
                     Thread.sleep(new Random().nextInt(10));
-                    BlockingQueue.take(queue);
+                    queue.take();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -154,18 +154,18 @@ class BlockingQueueTest {
         producer.join();
         consumer.join();
 
-        assertTrue(BlockingQueue.isEmpty(queue));
+        assertTrue(queue.isEmpty());
     }
 
     // ----------------------- Test Timeout ---------------------
     @Test
     public void testOfferWithTimeoutQueueIsFull() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(2);
-        BlockingQueue.put(queue, 1);
-        BlockingQueue.put(queue, 2);
+        queue.put( 1);
+        queue.put( 2);
 
         long start = System.currentTimeMillis();
-        assertFalse(BlockingQueue.offer(queue, 3, 1000));  // This should return false since the queue is full
+        assertFalse(queue.offer( 3, 1000));  // This should return false since the queue is full
         long end = System.currentTimeMillis();
 
         assertTrue(end - start >= 1000); // Should take at least 1 second
@@ -175,13 +175,13 @@ class BlockingQueueTest {
     @Test
     public void testOfferWithTimeoutQueueGetsAvailable() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(2);
-        BlockingQueue.put(queue, 1);
-        BlockingQueue.put(queue, 2);
+        queue.put( 1);
+        queue.put( 2);
 
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(500);
-                BlockingQueue.take(queue);
+                queue.take();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -189,7 +189,7 @@ class BlockingQueueTest {
 
         thread.start();
         long start = System.currentTimeMillis();
-        assertTrue(BlockingQueue.offer(queue, 3, 1000));
+        assertTrue(queue.offer( 3, 1000));
         long end = System.currentTimeMillis();
 
         assertFalse(end - start < 500);  // Should not take less than 0.5 seconds
@@ -200,80 +200,80 @@ class BlockingQueueTest {
     @Test
     public void testAdd() {
         BlockingQueue queue = new BlockingQueue(2);
-        assertTrue(BlockingQueue.add(queue, 1));
-        assertTrue(BlockingQueue.add(queue, 2));
-        assertThrows(IllegalStateException.class, () -> BlockingQueue.add(queue, 3));  // This should throw an exception since the queue is full
+        assertTrue(queue.add( 1));
+        assertTrue(queue.add( 2));
+        assertThrows(IllegalStateException.class, () -> queue.add( 3));  // This should throw an exception since the queue is full
     }
 
     // ----------------------- Test contains ---------------------
     @Test
     public void testContains() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(5);
-        BlockingQueue.put(queue, 1);
-        BlockingQueue.put(queue, 2);
-        BlockingQueue.put(queue, 3);
+        queue.put( 1);
+        queue.put( 2);
+        queue.put( 3);
 
-        assertTrue(BlockingQueue.contains(queue, 1));
-        assertTrue(BlockingQueue.contains(queue, 2));
-        assertTrue(BlockingQueue.contains(queue, 3));
-        assertFalse(BlockingQueue.contains(queue, 4));
+        assertTrue(queue.contains( 1));
+        assertTrue(queue.contains( 2));
+        assertTrue(queue.contains( 3));
+        assertFalse(queue.contains( 4));
     }
 
     // ----------------------- Test offer ---------------------
     @Test
     public void testOffer() {
         BlockingQueue queue = new BlockingQueue(2);
-        assertTrue(BlockingQueue.offer(queue, 1));
-        assertTrue(BlockingQueue.offer(queue, 2));
-        assertFalse(BlockingQueue.offer(queue, 3));  // This should return false since the queue is full
+        assertTrue(queue.offer( 1));
+        assertTrue(queue.offer( 2));
+        assertFalse(queue.offer( 3));  // This should return false since the queue is full
     }
 
     // ----------------------- Test peek ---------------------
     @Test
     public void testPeek() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(5);
-        BlockingQueue.put(queue, 1);
-        BlockingQueue.put(queue, 2);
-        BlockingQueue.put(queue, 3);
+        queue.put( 1);
+        queue.put( 2);
+        queue.put( 3);
 
-        assertEquals(1, BlockingQueue.peek(queue));
-        assertEquals(1, BlockingQueue.peek(queue));
-        assertEquals(1, BlockingQueue.take(queue));
-        assertEquals(2, BlockingQueue.peek(queue));
-        assertEquals(2, BlockingQueue.take(queue));
-        assertEquals(3, BlockingQueue.peek(queue));
-        assertEquals(3, BlockingQueue.take(queue));
-        assertNull(BlockingQueue.peek(queue));
+        assertEquals(1, queue.peek());
+        assertEquals(1, queue.peek());
+        assertEquals(1, queue.take());
+        assertEquals(2, queue.peek());
+        assertEquals(2, queue.take());
+        assertEquals(3, queue.peek());
+        assertEquals(3, queue.take());
+        assertNull(queue.peek());
     }
 
     // ----------------------- Test isEmpty ---------------------
     @Test
     public void testIsEmpty() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(5);
-        assertTrue(BlockingQueue.isEmpty(queue));
-        BlockingQueue.put(queue, 1);
-        assertFalse(BlockingQueue.isEmpty(queue));
-        BlockingQueue.put(queue, 2);
-        assertFalse(BlockingQueue.isEmpty(queue));
-        BlockingQueue.take(queue);
-        assertFalse(BlockingQueue.isEmpty(queue));
-        BlockingQueue.take(queue);
-        assertTrue(BlockingQueue.isEmpty(queue));
+        assertTrue(queue.isEmpty());
+        queue.put( 1);
+        assertFalse(queue.isEmpty());
+        queue.put( 2);
+        assertFalse(queue.isEmpty());
+        queue.take();
+        assertFalse(queue.isEmpty());
+        queue.take();
+        assertTrue(queue.isEmpty());
     }
 
     // ----------------------- Test isFull ---------------------
     @Test
     public void testIsFull() throws InterruptedException {
         BlockingQueue queue = new BlockingQueue(2);
-        assertFalse(BlockingQueue.isFull(queue));
-        BlockingQueue.put(queue, 1);
-        assertFalse(BlockingQueue.isFull(queue));
-        BlockingQueue.put(queue, 2);
-        assertTrue(BlockingQueue.isFull(queue));
-        BlockingQueue.take(queue);
-        assertFalse(BlockingQueue.isFull(queue));
-        BlockingQueue.take(queue);
-        assertFalse(BlockingQueue.isFull(queue));
+        assertFalse(queue.isFull());
+        queue.put( 1);
+        assertFalse(queue.isFull());
+        queue.put( 2);
+        assertTrue(queue.isFull());
+        queue.take();
+        assertFalse(queue.isFull());
+        queue.take();
+        assertFalse(queue.isFull());
     }
 
 
