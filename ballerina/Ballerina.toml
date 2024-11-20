@@ -16,6 +16,6 @@ observabilityIncluded = true
 [[platform.java17.dependency]]
 groupId = "io.ayash"
 artifactId = "blockingqueue-native"
-version = "1.0.0"
-path = "../native/build/libs/blockingqueue-native-1.0.0-SNAPSHOT.jar"
+version = "0.1.0"
+path = "../native/build/libs/blockingqueue-native-0.1.0-SNAPSHOT.jar"
 
