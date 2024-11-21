@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
   build:
@@ -21,16 +22,26 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      # Read Ballerina version from gradle.properties
-      - name: Read Ballerina Version
-        id: ballerina_version
-        run: echo "ballerina_version=$(grep ballerinaVersion gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+      # Set Gradle Properties as Environment Variables
+      # You can use any gradle property in the gradle.properties file as an environment variable.
+      # eg: ballerinaVersion=2.0.0 -> gradle.ballerinaVersion
+      - name: Set Gradle Properties as Environment Variables
+        run: |
+          while IFS='=' read -r key value; do
+            [[ -z "$key" || "$key" == \#* ]] && continue
+            key=$(echo $key | xargs)
+            value=$(echo $value | xargs)
+            prefixed_key="gradle_$key"
+            echo "$prefixed_key=$value" >> $GITHUB_ENV
+            echo "Exported $prefixed_key as an environment variable."
+            echo "Value: $value"
+          done < gradle.properties
 
       # Install Ballerina
       - name: Install Ballerina
         uses: ballerina-platform/setup-ballerina@v1
         with:
-          version: ${{ env.ballerina_version }}
+          version: ${{ env.gradle_ballerinaLangVersion }}
 
       # Build the Gradle project
       - name: Set Gradlew Permissions
