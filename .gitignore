@@ -50,3 +50,6 @@ generated
 *.env
 **/Config.toml
 examples/**/Dependencies.toml
+native/src/main/resources/META-INF/MANIFEST.MF
+native/bin/main/META-INF/MANIFEST.MF
+
