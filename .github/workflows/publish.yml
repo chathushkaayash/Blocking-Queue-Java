@@ -36,7 +36,6 @@ jobs:
             echo "Value: $value"
           done < gradle.properties
 
-
       # Install Ballerina
       - name: Install Ballerina
         uses: ballerina-platform/setup-ballerina@v1
