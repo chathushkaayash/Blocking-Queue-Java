@@ -28,13 +28,14 @@ jobs:
         run: |
           while IFS='=' read -r key value; do
             [[ -z "$key" || "$key" == \#* ]] && continue
-            key=$(echo $key | xargs)
-            value=$(echo $value | xargs)
-            prefixed_key="gradle_$key"
+            key=$(echo $key | xargs | tr '[:lower:]' '[:upper:]') # Trim whitespace and capitalize the key
+            value=$(echo $value | xargs) # Trim whitespace
+            prefixed_key="GRADLE_$key" # Add the "GRADLE_" prefix
             echo "$prefixed_key=$value" >> $GITHUB_ENV
             echo "Exported $prefixed_key as an environment variable."
             echo "Value: $value"
           done < gradle.properties
+
 
       # Install Ballerina
       - name: Install Ballerina
@@ -42,12 +43,11 @@ jobs:
         with:
           version: ${{ env.gradle_ballerinaLangVersion }}
 
-      # Build the Gradle project
+      # Publish the Gradle project
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
-      - name: Build with Gradle
+      - name: Publish with Gradle
         env:
           packageUser: ${{ secrets.packageUser }}
           packagePAT: ${{ secrets.packagePAT }}
         run: ./gradlew publish
-      
