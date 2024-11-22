@@ -42,6 +42,16 @@ jobs:
         with:
           version: ${{ env.GRADLE_BALLERINALANGVERSION }}
 
+      # Change Version to Timestamped Version
+      - name: Change to Timestamped Version
+        run: |
+          startTime=$(TZ="Asia/Kolkata" date +'%Y%m%d-%H%M00')
+          latestCommit=$(git log -n 1 --pretty=format:"%h")
+          VERSION=$((grep -w 'version' | cut -d= -f2) < gradle.properties | rev | cut --complement -d- -f1 | rev)
+          updatedVersion=$VERSION-$startTime-$latestCommit
+          echo $updatedVersion
+          sed -i "s/version=\(.*\)/version=$updatedVersion/g" gradle.properties
+
       # Publish the Gradle project
       - name: Set Gradlew Permissions
         run: chmod +x ./gradlew
