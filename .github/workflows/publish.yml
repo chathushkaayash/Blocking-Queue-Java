@@ -1,0 +1,62 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Set up JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      # Set Gradle Properties as Environment Variables
+      # You can use any gradle property in the gradle.properties file as an environment variable.
+      # eg: ballerinaVersion=2.0.0 -> gradle.ballerinaVersion
+      - name: Set Gradle Properties as Environment Variables
+        run: |
+          while IFS='=' read -r key value; do
+            [[ -z "$key" || "$key" == \#* ]] && continue
+            key=$(echo $key | xargs | tr '[:lower:]' '[:upper:]') # Trim whitespace and capitalize the key
+            value=$(echo $value | xargs) # Trim whitespace
+            prefixed_key="GRADLE_$key" # Add the "GRADLE_" prefix
+            echo "$prefixed_key=$value" >> $GITHUB_ENV
+            echo "Exported $prefixed_key as an environment variable."
+            echo "Value: $value"
+          done < gradle.properties
+
+      # Install Ballerina
+      - name: Install Ballerina
+        uses: ballerina-platform/setup-ballerina@v1
+        with:
+          version: ${{ env.GRADLE_BALLERINALANGVERSION }}
+
+      # Change Version to Timestamped Version
+      - name: Change to Timestamped Version
+        run: |
+          startTime=$(TZ="Asia/Kolkata" date +'%Y%m%d-%H%M00')
+          latestCommit=$(git log -n 1 --pretty=format:"%h")
+          VERSION=$((grep -w 'version' | cut -d= -f2) < gradle.properties | rev | cut --complement -d- -f1 | rev)
+          updatedVersion=$VERSION-$startTime-$latestCommit
+          echo $updatedVersion
+          sed -i "s/version=\(.*\)/version=$updatedVersion/g" gradle.properties
+
+      # Publish the Gradle project
+      - name: Set Gradlew Permissions
+        run: chmod +x ./gradlew
+      - name: Publish with Gradle
+        env:
+          packageUser: ${{ secrets.packageUser }}
+          packagePAT: ${{ secrets.packagePAT }}
+        run: ./gradlew publish
