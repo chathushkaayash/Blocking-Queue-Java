@@ -59,4 +59,4 @@ jobs:
         env:
           packageUser: ${{ secrets.packageUser }}
           packagePAT: ${{ secrets.packagePAT }}
-        run: ./gradlew publish --info --stacktrace
+        run: ./gradlew publish
