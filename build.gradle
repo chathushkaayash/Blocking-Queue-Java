@@ -34,24 +34,24 @@ allprojects {
         snapshotVersion = '-SNAPSHOT'
         timestampedVersionRegex = '.*-\\d{8}-\\d{6}-\\w.*\$'
     }
+}
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                groupId = 'com.github.chathushkaayash'
-                artifactId = 'ballerina-blockingqueue'
-                version = project.version
-            }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'com.github.chathushkaayash'
+            artifactId = 'ballerina-blockingqueue'
+            version = project.version
         }
+    }
 
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/chathushkaayash/ballerina-blocking-queue")
-                credentials {
-                    username System.getenv("packageUser")
-                    password System.getenv("packagePAT")
-                }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/chathushkaayash/ballerina-blocking-queue")
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
             }
         }
     }
